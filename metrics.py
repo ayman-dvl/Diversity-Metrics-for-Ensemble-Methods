@@ -8,6 +8,7 @@ import numpy as np
 # Q-statistic
 def q_statistic(a, b):
     """"
+    Calculate Q-statistic between two classifiers.
     a: array of binary predictions from classifier A
     b: array of binary predictions from classifier B
     Returns: Q-statistic value
@@ -22,8 +23,8 @@ def q_statistic(a, b):
 # Correlation
 def correlation(a, b):
     """
-    a: array of binary predictions from classifier A
-    b: array of binary predictions from classifier B
+    Calculate correlation coefficient between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: correlation coefficient
     """
     return np.corrcoef(a, b)[0, 1]
@@ -31,8 +32,8 @@ def correlation(a, b):
 # Disagreement
 def disagreement(a, b):
     """
-    a: array of binary predictions from classifier A
-    b: array of binary predictions from classifier B
+    Calculate disagreement rate between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: disagreement rate
     """
     N01 = np.sum((a == 0) & (b == 1))
@@ -43,8 +44,8 @@ def disagreement(a, b):
 # Double fault
 def double_fault(a, b):
     """
-    a: array of binary predictions from classifier A
-    b: array of binary predictions from classifier B
+    Calculate double fault rate between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: double fault rate
     """
     N00 = np.sum((a == 0) & (b == 0))
@@ -52,17 +53,16 @@ def double_fault(a, b):
     return N00 / N
 
 # Pairwise metrics
-def pairwise_metrics(matrix):
+def pairwise_metrics(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate pairwise metrics between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: dictionary of pairwise metrics
     """
-    n = matrix.shape[0]
+    n = a.shape[0]
     Qs, corrs, disagreements, double_faults = [], [], [], []
     for i in range(n):
         for j in range(i + 1, n):
-            a = matrix[i]
-            b = matrix[j]
             Qs.append(q_statistic(a, b))
             corrs.append(correlation(a, b))
             disagreements.append(disagreement(a, b))
@@ -76,49 +76,59 @@ def pairwise_metrics(matrix):
     }
 
 # Entropy
-def entropy(matrix):
+def entropy(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate entropy between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: entropy value
     """
+    matrix = np.vstack((a, b))
     mean_correct = np.mean(matrix, axis=0)
     return -np.mean(mean_correct * np.log2(mean_correct + 1e-10) + (1 - mean_correct) * np.log2(1 - mean_correct + 1e-10))
 
 # Kohavi-Wolpert variance
-def kw_variance(matrix):
+def kw_variance(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate Kohavi-Wolpert variance between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: Kohavi-Wolpert variance value
     """
+    matrix = np.vstack((a, b))
     mean_correct = np.mean(matrix, axis=0)
     return np.mean(mean_correct * (1 - mean_correct))
 
 # Interrater agreement (kappa)
-def kappa(matrix):
+def kappa(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate Cohen's kappa statistic between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: kappa value
     """
+    matrix = np.vstack((a, b))
     p_bar = np.mean(matrix)
     p_j = np.mean(matrix, axis=0)
     P_e = np.mean(p_j ** 2 + (1 - p_j) ** 2)
     return (p_bar - P_e) / (1 - P_e + 1e-10)
 
 # Difficulty θ
-def theta(matrix):
+def theta(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate difficulty θ value between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: difficulty θ value
     """
+    matrix = np.vstack((a, b))
     mean_correct = np.mean(matrix, axis=0)
     return np.var(mean_correct)
 
 # Generalized diversity
-def generalized_diversity(matrix):
+def generalized_diversity(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate generalized diversity between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: generalized diversity value
     """
+    matrix = np.vstack((a, b))
     m, n = matrix.shape
     incorrects = (matrix == 0).astype(int)
     shared_errors = np.dot(incorrects, incorrects.T)
@@ -127,11 +137,13 @@ def generalized_diversity(matrix):
     return GD / n
 
 # Coincident Failure Diversity (CFD)
-def cfd(matrix):
+def cfd(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate Coincident Failure Diversity (CFD) between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: Coincident Failure Diversity (CFD) value
     """
+    matrix = np.vstack((a, b))
     m, _ = matrix.shape
     incorrects = (matrix == 0).astype(int)
     total_failures = np.sum(incorrects, axis=0)
@@ -139,16 +151,17 @@ def cfd(matrix):
     return 1 - (max_failures / m)
 
 # Non-pairwise metrics
-def non_pairwise_metrics(matrix):
+def non_pairwise_metrics(a, b):
     """
-    matrix: 2D numpy array of binary predictions (shape: n_classifiers x n_test_samples)
+    Calculate non-pairwise metrics between two classifiers.
+    a, b: arrays of binary predictions from two classifiers
     Returns: dictionary of non-pairwise metrics
     """
     return {
-        "entropy": entropy(matrix),
-        "KW_variance": kw_variance(matrix),
-        "kappa": kappa(matrix),
-        "theta": theta(matrix),
-        "generalized_diversity": generalized_diversity(matrix),
-        "CFD": cfd(matrix)
+        "entropy": entropy(a, b),
+        "KW_variance": kw_variance(a, b),
+        "kappa": kappa(a, b),
+        "theta": theta(a, b),
+        "generalized_diversity": generalized_diversity(a, b),
+        "CFD": cfd(a, b)
     }
