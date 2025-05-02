@@ -54,20 +54,20 @@ def double_fault(a, b):
     return N00 / N
 
 # Pairwise metrics
-def pairwise_metrics(a, b):
+def pairwise_metrics(matrix):
     """
-    Calculate pairwise metrics between two classifiers.
-    a, b: arrays of binary predictions from two classifiers
+    Calculate pairwise metrics for a matrix of classifiers.
+    matrix: 2D array where each row is a binary prediction from a classifier
     Returns: dictionary of pairwise metrics
     """
-    n = a.shape[0]
+    n = matrix.shape[0]
     Qs, corrs, disagreements, double_faults = [], [], [], []
     for i in range(n):
         for j in range(i + 1, n):
-            Qs.append(q_statistic(a, b))
-            corrs.append(correlation(a, b))
-            disagreements.append(disagreement(a, b))
-            double_faults.append(double_fault(a, b))
+            Qs.append(q_statistic(matrix[i], matrix[j]))
+            corrs.append(correlation(matrix[i], matrix[j]))
+            disagreements.append(disagreement(matrix[i], matrix[j]))
+            double_faults.append(double_fault(matrix[i], matrix[j]))
 
     return {
         "Q_statistic": np.mean(Qs),
