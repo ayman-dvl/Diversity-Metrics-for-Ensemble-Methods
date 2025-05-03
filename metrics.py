@@ -4,6 +4,7 @@ This module contains functions to calculate various diversity metrics for ensemb
 """
 
 import numpy as np
+import utils as ut
 
 ### Stup functions ###
 # Q-statistic
@@ -28,8 +29,22 @@ def correlation(a, b):
     a, b: arrays of binary predictions from two classifiers
     Returns: correlation coefficient
     """
-    return np.corrcoef(a, b)[0, 1]
-
+    N11 = np.sum((a == 1) & (b == 1))
+    N00 = np.sum((a == 0) & (b == 0))
+    N10 = np.sum((a == 1) & (b == 0))
+    N01 = np.sum((a == 0) & (b == 1))
+    numerator = N11 * N00 - N01 * N10
+    denominator = np.sqrt(
+        (N11 + N10) * 
+        (N01 + N00) * 
+        (N11 + N01) * 
+        (N10 + N00)
+    )
+    
+    if denominator == 0:
+        return 0.0  # To avoid division by zero
+    
+    return numerator / denominator
 # Disagreement
 def disagreement(a, b):
     """
@@ -160,3 +175,46 @@ def non_pairwise_metrics(matrix):
         "generalized_diversity": generalized_diversity(matrix),
         "CFD": cfd(matrix)
     }
+
+def calculate_q_statistic(M1, M2, X, y):
+    """ 
+    Calculate the Q-statistic between two models.
+    Parameters:
+    - M1: First model.
+    - M2: Second model.
+    - X: Feature data.
+    - y: Labels.
+    Returns:
+    - float: Q-statistic value.
+    """
+    # Get oracle outputs
+    oracle_M1 = ut.get_oracle_output(M1, X, y)
+    oracle_M2 = ut.get_oracle_output(M2, X, y)
+
+    # Calculate Q-statistic
+    Q = q_statistic(oracle_M1, oracle_M2)
+    return Q
+
+def calculate_q_statistic_for_models(models, X, y, k= -1):
+    """
+    Calculate Q-statistic for an array of models.
+    Parameters:
+    - models: List of models.
+    - X: Feature data.
+    - y: Labels.
+    - k: Parameter for the number of best pairs to return
+    Returns:
+    - dict: Dictionary of k best pairs of models by the value of Q-statistics.
+        The Q-statistics are sorted in ascending order.
+        Most diverse pairs are at the top of the dictionary.
+    """
+    n = len(models)
+    model_list = list(models.values())  
+    model_names = list(models.keys())
+    results = {}
+    for i in range(n):
+        for j in range(i + 1, n):
+            Q_statistic = calculate_q_statistic(model_list[i], model_list[j], X, y)
+            results[f"{model_names[i]} vs {model_names[j]}"] = Q_statistic
+    results = dict(list(sorted(results.items(), key=lambda item: item[1]))[:k])
+    return results
