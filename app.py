@@ -17,14 +17,10 @@ uploaded_models = {}
 class PairwiseMetricsRequest(BaseModel):
     model_a: str
     model_b: str
-    X: list[list[float]]
-    y: list[int]
 
 # Define the request body schema for pairwise metrics for multiple models
 class PairwiseMetricsForModelsRequest(BaseModel):
     models: list[str]  # List of model names (keys in uploaded_models)
-    X: list[list[float]]
-    y: list[int]
     k: int = -1  # Optional parameter for top-k results
 
 # In-memory storage for uploaded dataset
@@ -53,13 +49,13 @@ async def upload_dataset(file: UploadFile = File(...)):
         # Clean up the temporary file
         os.remove(file_location)
 
-    # Ensure the dataset contains 'X' and 'y' columns
-    if "X" not in data.columns or "y" not in data.columns:
-        raise HTTPException(status_code=400, detail="Dataset must contain 'X' and 'y' columns.")
+    # Ensure the dataset has at least two columns
+    if data.shape[1] < 2:
+        raise HTTPException(status_code=400, detail="Dataset must contain at least two columns.")
 
-    # Store the dataset in memory
-    uploaded_dataset["X"] = data["X"].tolist()
-    uploaded_dataset["y"] = data["y"].tolist()
+    # Separate the last column as 'y' and the rest as 'X'
+    uploaded_dataset["X"] = data.iloc[:, :-1].values.tolist()
+    uploaded_dataset["y"] = data.iloc[:, -1].values.tolist()
 
     return {"message": "Dataset uploaded and processed successfully!"}
 
@@ -110,6 +106,7 @@ def calculate_pairwise_metrics_for_models_endpoint(request: PairwiseMetricsForMo
     metrics = calculate_pairwise_metrics_for_models(models, X, y, request.k)
 
     return {"pairwise_metrics_for_models": metrics}
+
 @app.post("/upload_model/")
 async def upload_model(file: UploadFile = File(...)):
     """
@@ -137,6 +134,38 @@ async def upload_model(file: UploadFile = File(...)):
     os.remove(file_location)
 
     return {"message": f"Model {file.filename} uploaded and loaded successfully!"}
+
+@app.post("/upload_models/")
+async def upload_models(files: list[UploadFile] = File(...)):
+    """
+    Upload multiple model files and process them.
+    """
+    print(f"Received files: {[file.filename for file in files]}")
+    uploaded_files = []
+    for file in files:
+        # Save the uploaded file temporarily
+        file_location = f"temp_{file.filename}"
+        with open(file_location, "wb") as f:
+            f.write(await file.read())
+
+        # Load the model based on file extension
+        model = None
+        if file.filename.endswith(".pkl"):
+            model = joblib.load(file_location)
+        elif file.filename.endswith(".h5"):
+            model = load_model(file_location)
+        else:
+            os.remove(file_location)
+            return {"error": f"Unsupported file format for {file.filename}. Please upload .pkl or .h5 files only."}
+
+        # Store the model in memory
+        uploaded_models[file.filename] = model
+        uploaded_files.append(file.filename)
+
+        # Clean up the temporary file
+        os.remove(file_location)
+
+    return {"message": f"Models {', '.join(uploaded_files)} uploaded and loaded successfully!"}
 
 @app.get("/models/")
 def list_uploaded_models():
