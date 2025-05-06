@@ -218,3 +218,59 @@ def calculate_q_statistic_for_models(models, X, y, k= -1):
             results[f"{model_names[i]} vs {model_names[j]}"] = Q_statistic
     results = dict(list(sorted(results.items(), key=lambda item: item[1]))[:k])
     return results
+
+def calculate_pairwise_metrics(M1, M2, X, y):
+    """
+    Calculate pairwise metrics between two models.
+    Parameters:
+    - M1: First model.
+    - M2: Second model.
+    - X: Feature data.
+    - y: Labels.
+    Returns:
+    - dict: Dictionary of pairwise metrics.
+    """
+    # Get oracle outputs
+    oracle_M1 = ut.get_oracle_output(M1, X, y)
+    oracle_M2 = ut.get_oracle_output(M2, X, y)
+
+    # Calculate metrics
+    metrics = {
+        "Q_statistic": q_statistic(oracle_M1, oracle_M2),
+        "correlation": correlation(oracle_M1, oracle_M2),
+        "disagreement": disagreement(oracle_M1, oracle_M2),
+        "double_fault": double_fault(oracle_M1, oracle_M2)
+    }
+    return metrics
+
+def calculate_pairwise_metrics_for_models(models, X, y, k= -1):
+    """
+    Calculate pairwise metrics for an array of models.
+    Parameters:
+    - models: List of models.
+    - X: Feature data.
+    - y: Labels.
+    - k: Parameter for the number of best pairs to return
+    Returns:
+    - dict: Dictionary of k best pairs of models by the value of Q-statistics.
+        The Q-statistics are sorted in ascending order.
+        Most diverse pairs are
+          at the top of the dictionary.
+    """
+    n = len(models)
+    model_list = list(models.values())  
+    model_names = list(models.keys())
+    results = {}
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            metrics = calculate_pairwise_metrics(model_list[i], model_list[j], X, y)
+            results[f"{model_names[i]} vs {model_names[j]}"] = metrics
+    sorted_results = {
+        "Q_statistic": dict(list(sorted(results.items(), key=lambda item: item[1]["Q_statistic"]))[:k]),
+        "correlation": dict(list(sorted(results.items(), key=lambda item: item[1]["correlation"]))[:k]),
+        "disagreement": dict(list(sorted(results.items(), key=lambda item: item[1]["disagreement"], reverse = True))[:k]),
+        "double_fault": dict(list(sorted(results.items(), key=lambda item: item[1]["double_fault"]))[:k])
+    }
+
+    return sorted_results

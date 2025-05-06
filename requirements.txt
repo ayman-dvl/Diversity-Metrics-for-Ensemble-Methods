@@ -3,3 +3,6 @@ numpy
 scikit-learn
 tensorflow
 pandas
+fastapi 
+uvicorn
+python-multipart
