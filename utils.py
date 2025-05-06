@@ -2,6 +2,10 @@
 Utility functions.
 """
 
+import os
+import joblib
+from tensorflow.keras.models import load_model
+
 def get_oracle_output(model, X, y):
     """
     Generate oracle output (1=correct, 0=incorrect) for a given model.
@@ -37,7 +41,7 @@ def load_models(models_folder):
         if file_extension == "pkl":
             models[model_name] = joblib.load(os.path.join(models_folder, file))
             print(f"Imported sklearn model: {model_name}")
-        elif file_extension == "keras":
+        elif file_extension == "h5":
             models[model_name] = load_model(os.path.join(models_folder, file))
             print(f"Imported keras model: {model_name}")
     return models
