@@ -17,4 +17,4 @@ EXPOSE 80
 ENV PYTHONUNBUFFERED=1
 
 # Set a default command to run the application
-CMD ["python", "main.py"]
+CMD ["python", "app.py"]
