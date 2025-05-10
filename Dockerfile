@@ -4,7 +4,7 @@ FROM python:3.9-slim
 # Définir le dossier de travail à l'intérieur du conteneur
 WORKDIR /app
 
-# Copier tout le contenu de ton projet dans le conteneur
+# Copier tout le contenu du projet dans le conteneur
 COPY . /app
 
 # Installer les dépendances
