@@ -59,53 +59,6 @@ async def upload_dataset(file: UploadFile = File(...)):
 
     return {"message": "Dataset uploaded and processed successfully!"}
 
-# Update the request bodies to fetch the uploaded dataset
-@app.post("/pairwise_metrics/")
-def calculate_pairwise_metrics_endpoint(request: PairwiseMetricsRequest):
-    """
-    Calculate pairwise metrics between two models.
-    """
-    if uploaded_dataset["X"] is None or uploaded_dataset["y"] is None:
-        return {"error": "No dataset uploaded. Please upload a dataset first."}
-
-    # Retrieve models from memory
-    model_a = uploaded_models.get(request.model_a)
-    model_b = uploaded_models.get(request.model_b)
-
-    if model_a is None or model_b is None:
-        return {"error": "One or both models not found. Please upload the models first."}
-
-    # Convert input data to numpy arrays
-    X = np.array(uploaded_dataset["X"])
-    y = np.array(uploaded_dataset["y"])
-
-    # Calculate pairwise metrics
-    metrics = calculate_pairwise_metrics(model_a, model_b, X, y)
-
-    return {"pairwise_metrics": metrics}
-
-@app.post("/pairwise_metrics_for_models/")
-def calculate_pairwise_metrics_for_models_endpoint(request: PairwiseMetricsForModelsRequest):
-    """
-    Calculate pairwise metrics for multiple models.
-    """
-    if uploaded_dataset["X"] is None or uploaded_dataset["y"] is None:
-        return {"error": "No dataset uploaded. Please upload a dataset first."}
-
-    # Retrieve models from memory
-    models = {name: uploaded_models.get(name) for name in request.models}
-
-    if None in models.values():
-        return {"error": "One or more models not found. Please upload the models first."}
-
-    # Convert input data to numpy arrays
-    X = np.array(uploaded_dataset["X"])
-    y = np.array(uploaded_dataset["y"])
-
-    # Calculate pairwise metrics for models
-    metrics = calculate_pairwise_metrics_for_models(models, X, y, request.k)
-
-    return {"pairwise_metrics_for_models": metrics}
 
 @app.post("/upload_model/")
 async def upload_model(file: UploadFile = File(...)):
@@ -167,6 +120,53 @@ async def upload_models(files: list[UploadFile] = File(...)):
 
     return {"message": f"Models {', '.join(uploaded_files)} uploaded and loaded successfully!"}
 
+@app.post("/pairwise_metrics/")
+def calculate_pairwise_metrics_endpoint(request: PairwiseMetricsRequest):
+    """
+    Calculate pairwise metrics between two models.
+    """
+    if uploaded_dataset["X"] is None or uploaded_dataset["y"] is None:
+        return {"error": "No dataset uploaded. Please upload a dataset first."}
+
+    # Retrieve models from memory
+    model_a = uploaded_models.get(request.model_a)
+    model_b = uploaded_models.get(request.model_b)
+
+    if model_a is None or model_b is None:
+        return {"error": "One or both models not found. Please upload the models first."}
+
+    # Convert input data to numpy arrays
+    X = np.array(uploaded_dataset["X"])
+    y = np.array(uploaded_dataset["y"])
+
+    # Calculate pairwise metrics
+    metrics = calculate_pairwise_metrics(model_a, model_b, X, y)
+
+    return {"pairwise_metrics": metrics}
+
+@app.post("/pairwise_metrics_for_models/")
+def calculate_pairwise_metrics_for_models_endpoint(request: PairwiseMetricsForModelsRequest):
+    """
+    Calculate pairwise metrics for multiple models.
+    """
+    if uploaded_dataset["X"] is None or uploaded_dataset["y"] is None:
+        return {"error": "No dataset uploaded. Please upload a dataset first."}
+
+    # Retrieve models from memory
+    models = {name: uploaded_models.get(name) for name in request.models}
+
+    if None in models.values():
+        return {"error": "One or more models not found. Please upload the models first."}
+
+    # Convert input data to numpy arrays
+    X = np.array(uploaded_dataset["X"])
+    y = np.array(uploaded_dataset["y"])
+
+    # Calculate pairwise metrics for models
+    metrics = calculate_pairwise_metrics_for_models(models, X, y, request.k)
+
+    return {"pairwise_metrics_for_models": metrics}
+
 @app.get("/models/")
 def list_uploaded_models():
     """
@@ -175,17 +175,6 @@ def list_uploaded_models():
     if not uploaded_models:
         return {"message": "No models have been uploaded yet."}
     return {"uploaded_models": list(uploaded_models.keys())}
-
-@app.delete("/delete_model/{model_name}")
-def delete_model(model_name: str):
-    """
-    Delete a model from memory.
-    """
-    if model_name in uploaded_models:
-        del uploaded_models[model_name]
-        return {"message": f"Model {model_name} deleted successfully!"}
-    else:
-        return {"error": f"Model {model_name} not found."}
 
 @app.get("/dataset/")
 def get_uploaded_dataset():
@@ -198,6 +187,17 @@ def get_uploaded_dataset():
         "X": uploaded_dataset["X"],
         "y": uploaded_dataset["y"]
     }
+
+@app.delete("/delete_model/{model_name}")
+def delete_model(model_name: str):
+    """
+    Delete a model from memory.
+    """
+    if model_name in uploaded_models:
+        del uploaded_models[model_name]
+        return {"message": f"Model {model_name} deleted successfully!"}
+    else:
+        return {"error": f"Model {model_name} not found."}
 
 @app.delete("/delete_dataset/")
 def delete_dataset():
