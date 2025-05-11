@@ -13,7 +13,7 @@ Cette partie du projet expose une API REST construite avec **FastAPI** permettan
 
 ### 1. Cloner le dépôt
 ```bash
-git clone https://github.com/ouiame10/Diversity-Metrics-for-Ensemble-Methods
+git clone https://github.com/ayman-dvl/Diversity-Metrics-for-Ensemble-Methods
 cd Diversity-Metrics-for-Ensemble-Methods
 ```
 
@@ -69,12 +69,6 @@ Ce guide explique comment exécuter l'API FastAPI reçue sous forme d'image Dock
 
 - Lance PowerShell, CMD ou Terminal 
 - Va dans le dossier contenant le `.tar`. Exemple :
-
-```bash
-cd "C:\Users\TonNom\Downloads"
-```
-
----
 
 ### 3.  Charger l'image Docker
 
