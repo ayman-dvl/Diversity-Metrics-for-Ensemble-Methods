@@ -121,7 +121,7 @@ async def upload_model(file: UploadFile = File(...)):
     model = None
     if file.filename.endswith(".pkl"):
         model = joblib.load(file_location)
-    elif file.filename.endswith(".h5"):
+    elif file.filename.endswith((".h5", ".keras")):
         model = load_model(file_location)
     else:
         os.remove(file_location)
@@ -152,7 +152,7 @@ async def upload_models(files: list[UploadFile] = File(...)):
         model = None
         if file.filename.endswith(".pkl"):
             model = joblib.load(file_location)
-        elif file.filename.endswith(".h5"):
+        elif file.filename.endswith(".h5", ".keras"):
             model = load_model(file_location)
         else:
             os.remove(file_location)
