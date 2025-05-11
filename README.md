@@ -1,107 +1,105 @@
-# FastAPI Ensemble Metrics API
-## Option 1 : passer par github
-Cette partie du projet expose une API REST construite avec **FastAPI** permettant de :
-- Uploader un dataset (CSV ou Excel)
-- Uploader un ou plusieurs modèles (.pkl ou .h5)
-- Calculer des métriques de diversité entre modèles (Q-statistic, correlation, etc.)
+# FastAPI Ensemble Metrics API  
+## Option 1: Using GitHub  
+This part of the project exposes a REST API built with **FastAPI** that allows you to:  
+- Upload a dataset (CSV or Excel)  
+- Upload one or more models (`.pkl`, `.keras` or `.h5`)  
+- Calculate diversity metrics between models (Q-statistic, correlation, etc.)  
 
-##  Prérequis
+## Prerequisites  
 
-- Avoir **Docker** installé : https://www.docker.com/products/docker-desktop
+- Have **Docker** installed: https://www.docker.com/products/docker-desktop  
 
-##  Lancer le projet avec Docker
+## Launch the Project with Docker  
 
-### 1. Cloner le dépôt
-```bash
-git clone https://github.com/ayman-dvl/Diversity-Metrics-for-Ensemble-Methods
-cd Diversity-Metrics-for-Ensemble-Methods
-```
+### 1. Clone the Repository  
+```bash  
+git clone https://github.com/ayman-dvl/Diversity-Metrics-for-Ensemble-Methods  
+cd Diversity-Metrics-for-Ensemble-Methods  
+```  
 
-### 2. Construire l'image Docker
-```bash
-docker build -t fastapi-metrics-app .
-```
+### 2. Build the Docker Image  
+```bash  
+docker build -t fastapi-metrics-app .  
+```  
 
-### 3. Lancer le conteneur
-```bash
-docker run -d -p 8000:8000 fastapi-metrics-app
-```
+### 3. Run the Container  
+```bash  
+docker run -d -p 8000:8000 fastapi-metrics-app  
+```  
 
-### 4. Accéder à l'API
-- Documentation interactive : [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- Health check : [http://127.0.0.1:8000/healthcheck](http://127.0.0.1:8000/healthcheck)
+### 4. Access the API  
+- Interactive documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)  
+- Health check: [http://127.0.0.1:8000/healthcheck](http://127.0.0.1:8000/healthcheck)  
 
-##  Endpoints disponibles
+## Available Endpoints  
 
-| Méthode | Endpoint                        | Description                                 |
-|---------|----------------------------------|---------------------------------------------|
-| POST    | /upload_dataset/                | Upload d’un fichier CSV ou Excel            |
-| POST    | /upload_model/                  | Upload d’un seul modèle `.pkl` ou `.h5`     |
-| POST    | /upload_models/                 | Upload de plusieurs modèles en une fois     |
-| GET     | /models/                        | Liste des modèles chargés                   |
-| POST    | /pairwise_metrics/              | Calcul des métriques entre 2 modèles        |
-| POST    | /pairwise_metrics_for_models/   | Calcul des métriques pour plusieurs modèles |
-| DELETE  | /delete_model/{model_name}      | Supprimer un modèle                         |
-| DELETE  | /delete_dataset/                | Supprimer le dataset                        |
+| Method | Endpoint                        | Description                                 |  
+|--------|----------------------------------|---------------------------------------------|  
+| POST   | `/upload_dataset/`              | Upload a CSV or Excel file                 |  
+| POST   | `/upload_model/`                | Upload a single (`.pkl`, `.keras` or `.h5`)  model      |  
+| POST   | `/upload_models/`               | Upload multiple models at once             |  
+| POST   | `/pairwise_metrics/`            | Calculate metrics between 2 models         |  
+| POST   | `/pairwise_metrics_for_models/` | Calculate metrics for multiple models      |  
+| GET    | `/models/`                      | Get list of uploaded models                         |  
+| GET    | `/dataset/`                     | Get list of uploaded dataset   |
+| DELETE | `/delete_model/{model_name}`    | Delete a model                             |  
+| DELETE | `/delete_dataset/`              | Delete the dataset                         |  
 
+## Option 2: Using the Docker Image `fastapi-metrics-app.tar`  
 
-## Option 2 : Utiliser l'image Docker `fastapi-metrics-app.tar`
+This guide explains how to run the FastAPI API received as a Docker image (`.tar`) without needing the source code.  
 
-Ce guide explique comment exécuter l'API FastAPI reçue sous forme d'image Docker (`.tar`) sans avoir besoin du code source.
+---  
 
----
+## Prerequisites  
 
-##  Prérequis
+- Have **Docker** installed: https://www.docker.com/products/docker-desktop  
 
-- Avoir **Docker** installé : https://www.docker.com/products/docker-desktop
-- Avoir téléchargé le fichier `fastapi-metrics-app.tar` depuis le lien Google Drive ci joint :  
+---  
 
----
+### 1. Download the Docker Image  
 
+- Download the `fastapi-metrics-app.tar` file from the shared link.  
 
-### 1.  Télécharger l'image Docker
+---  
 
-- Télécharge le fichier `fastapi-metrics-app.tar` depuis le lien partagé
+### 2. Open a Terminal  
 
----
+- Launch PowerShell, CMD, or Terminal.  
+- Navigate to the folder containing the `.tar` file. Example:  
 
-### 2.  Ouvrir un terminal
+### 3. Load the Docker Image  
 
-- Lance PowerShell, CMD ou Terminal 
-- Va dans le dossier contenant le `.tar`. Exemple :
+```bash  
+docker load -i fastapi-metrics-app.tar  
+```  
 
-### 3.  Charger l'image Docker
+You should see a message like:  
+```  
+Loaded image: fastapi-metrics-app:latest  
+```  
 
-```bash
-docker load -i fastapi-metrics-app.tar
-```
+---  
 
-Tu dois voir un message du type :
-```
-Loaded image: fastapi-metrics-app:latest
-```
+### 4. Run the Docker Container  
 
----
+```bash  
+docker run -p 8000:8000 fastapi-metrics-app  
+```  
 
-### 4. Lancer le conteneur Docker
+Your API will now be accessible at:  
+```  
+http://127.0.0.1:8000  
+```  
 
-```bash
-docker run -p 8000:8000 fastapi-metrics-app
-```
+---  
 
- Ton API sera maintenant accessible à l'adresse :
-```
-http://127.0.0.1:8000
-```
+### 5. Test the API in a Browser  
 
----
+Open:  
+```  
+http://127.0.0.1:8000/docs  
+```  
+You can interact with the API via Swagger UI.  
 
-### 5.  Tester l’API dans un navigateur
-
-Ouvre :
-```
-http://127.0.0.1:8000/docs
-```
-Tu pourras interagir avec l'API via Swagger UI.
-
----
+---  
