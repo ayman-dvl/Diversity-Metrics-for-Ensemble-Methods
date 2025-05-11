@@ -1,4 +1,6 @@
-# FastAPI Ensemble Metrics API  
+# Diversity Metrics For Ensemble Methods
+
+# API Usage
 ## Option 1: Using GitHub  
 This part of the project exposes a REST API built with **FastAPI** that allows you to:  
 - Upload a dataset (CSV or Excel)  
