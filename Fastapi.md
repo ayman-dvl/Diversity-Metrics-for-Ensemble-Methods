@@ -50,8 +50,9 @@ docker run -d -p 8000:8000 fastapi-metrics-app
 | POST   | `/upload_models/`               | Upload multiple models at once             |  
 | POST   | `/pairwise_metrics/`            | Calculate metrics between 2 models         |  
 | POST   | `/pairwise_metrics_for_models/` | Calculate metrics for multiple models      |  
-| GET    | `/models/`                      | Get list of uploaded models                         |  
-| GET    | `/dataset/`                     | Get list of uploaded dataset   |
+| POST   | `/least_correlated_metrics/`    | Get k least correlated metric pairs        |  
+| GET    | `/models/`                      | Get list of uploaded models                |  
+| GET    | `/dataset/`                     | Get list of uploaded dataset               |
 | DELETE | `/delete_model/{model_name}`    | Delete a model                             |  
 | DELETE | `/delete_dataset/`              | Delete the dataset                         |  
 
