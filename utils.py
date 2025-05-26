@@ -4,7 +4,11 @@ Utility functions.
 
 import os
 import joblib
-from tensorflow.keras.models import load_model
+from tensorflow.python.keras.models import load_model
+import metrics as me
+import numpy as np
+import pandas as pd
+
 
 def get_oracle_output(model, X, y):
     """
@@ -45,3 +49,48 @@ def load_models(models_folder):
             models[model_name] = load_model(os.path.join(models_folder, file))
             print(f"Imported keras model: {model_name}")
     return models
+
+def calculate_diversity_metrics_correlation(models, X, y):
+
+    oracle_outputs = {}
+    for name, model in models.items():
+        oracle_outputs[name] = get_oracle_output(model, X, y)
+
+        
+    diversity_results = []
+
+    model_names = list(oracle_outputs.keys())
+    for i in range(len(model_names)):
+        subset = [oracle_outputs[name] for j, name in enumerate(model_names) if j != i]
+        subset_matrix = np.array(subset)
+        metrics = me.non_pairwise_metrics(subset_matrix)
+        pairwise_metrics = me.pairwise_metrics(subset_matrix)
+        metrics.update(pairwise_metrics)
+        diversity_results.append(metrics)
+
+    df_metrics = pd.DataFrame(diversity_results)
+
+    correlation_matrix = df_metrics.corr(method='pearson')
+    return correlation_matrix
+
+def get_least_correlated_metrics(correlation_matrix, k):
+    """
+    Get the least correlated metric pairs from a correlation matrix.
+    Parameters:
+    correlation_matrix (pd.DataFrame): A DataFrame containing the correlation matrix.
+    k (int): The number of least correlated metric pairs to return.
+    Returns:
+    pd.DataFrame: A DataFrame containing the least correlated metric pairs and their correlation values.
+    """
+    # Flatten the correlation matrix and get the absolute values
+    corr_values = correlation_matrix.abs().unstack()
+    
+    # Remove self-correlations (diagonal elements)
+    corr_values = corr_values[corr_values.index.get_level_values(0) != corr_values.index.get_level_values(1)]
+    
+    # Sort by correlation values in ascending order
+    least_correlated = corr_values.sort_values().head(k)
+    least_correlated = least_correlated.reset_index()
+    least_correlated.columns = ['Metric_1', 'Metric_2', 'Correlation']
+    # Return the metric pairs and their correlation values
+    return least_correlated
