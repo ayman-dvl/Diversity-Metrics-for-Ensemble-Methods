@@ -73,14 +73,17 @@ def calculate_diversity_metrics_correlation(models, X, y):
     correlation_matrix = df_metrics.corr(method='pearson')
     return correlation_matrix
 
-def get_least_correlated_metrics(correlation_matrix, k):
+def get_least_correlated_metrics(correlation_matrix, k=5):
     """
-    Get the least correlated metric pairs from a correlation matrix.
+    Get the least correlated metric pairs from a correlation matrix, removing duplicate pairs.
+    
     Parameters:
-    correlation_matrix (pd.DataFrame): A DataFrame containing the correlation matrix.
-    k (int): The number of least correlated metric pairs to return.
+        correlation_matrix (pd.DataFrame): A DataFrame containing the correlation matrix.
+        k (int): The number of least correlated metric pairs to return.
+    
     Returns:
-    pd.DataFrame: A DataFrame containing the least correlated metric pairs and their correlation values.
+        pd.DataFrame: A DataFrame containing the unique least correlated metric pairs 
+                     and their correlation values.
     """
     # Flatten the correlation matrix and get the absolute values
     corr_values = correlation_matrix.abs().unstack()
@@ -88,9 +91,28 @@ def get_least_correlated_metrics(correlation_matrix, k):
     # Remove self-correlations (diagonal elements)
     corr_values = corr_values[corr_values.index.get_level_values(0) != corr_values.index.get_level_values(1)]
     
-    # Sort by correlation values in ascending order
-    least_correlated = corr_values.sort_values().head(k)
-    least_correlated = least_correlated.reset_index()
-    least_correlated.columns = ['Metric_1', 'Metric_2', 'Correlation']
-    # Return the metric pairs and their correlation values
+    # Create a set to store processed pairs
+    processed_pairs = set()
+    unique_pairs = []
+    
+    # Process pairs in ascending order of correlation
+    for idx, corr in corr_values.sort_values().items():
+        metric1, metric2 = idx
+        # Create a frozen set to handle unordered pairs
+        pair = frozenset([metric1, metric2])
+        
+        if pair not in processed_pairs:
+            processed_pairs.add(pair)
+            unique_pairs.append({
+                'Metric_1': metric1,
+                'Metric_2': metric2,
+                'Correlation': corr
+            })
+            
+            if len(unique_pairs) == k:
+                break
+    
+    # Convert to DataFrame
+    least_correlated = pd.DataFrame(unique_pairs)
+    
     return least_correlated

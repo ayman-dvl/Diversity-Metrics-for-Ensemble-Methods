@@ -24,6 +24,9 @@ class PairwiseMetricsForModelsRequest(BaseModel):
     models: list[str]  # List of model names (keys in uploaded_models)
     k: int = -1  # Optional parameter for top-k results
 
+class LeastCorrelatedMetricsRequest(BaseModel):
+    k: int = 5  
+
 # In-memory storage for uploaded dataset
 uploaded_dataset = {"X": None, "y": None}
 
@@ -169,7 +172,7 @@ def calculate_pairwise_metrics_for_models_endpoint(request: PairwiseMetricsForMo
     return {"pairwise_metrics_for_models": metrics}
 
 @app.post("/least_correlated_metrics/")
-def get_least_correlated_metrics_endpoint(k: int = 5):
+def get_least_correlated_metrics_endpoint(request: LeastCorrelatedMetricsRequest):
     """
     Get the least correlated metrics from the uploaded models.
     """
@@ -184,10 +187,10 @@ def get_least_correlated_metrics_endpoint(k: int = 5):
     y = np.array(uploaded_dataset["y"])
 
     # Calculate diversity metrics correlation
-    correlation_matrix = calculate_pairwise_metrics_for_models(uploaded_models, X, y)
+    correlation_matrix = ut.calculate_diversity_metrics_correlation(uploaded_models, X, y)
 
     # Get the least correlated metrics
-    least_correlated_metrics = ut.get_least_correlated_metrics(correlation_matrix, k)
+    least_correlated_metrics = ut.get_least_correlated_metrics(correlation_matrix, request.k)
 
     return {"least_correlated_metrics": least_correlated_metrics.to_dict(orient='records')}
 

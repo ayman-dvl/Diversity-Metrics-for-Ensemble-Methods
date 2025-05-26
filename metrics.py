@@ -158,7 +158,7 @@ def cfd(matrix):
     incorrects = (matrix == 0).astype(int)
     total_failures = np.sum(incorrects, axis=0)
     max_failures = np.max(total_failures)
-    return 1 - (max_failures / m)
+    return float(1 - (max_failures / m))
 
 # Non-pairwise metrics
 def non_pairwise_metrics(matrix):
