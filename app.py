@@ -7,6 +7,7 @@ from tensorflow.keras.models import load_model
 import os
 from fastapi import HTTPException
 import pandas as pd
+import utils as ut
 
 app = FastAPI()
 
@@ -166,6 +167,29 @@ def calculate_pairwise_metrics_for_models_endpoint(request: PairwiseMetricsForMo
     metrics = calculate_pairwise_metrics_for_models(models, X, y, request.k)
 
     return {"pairwise_metrics_for_models": metrics}
+
+@app.post("/least_correlated_metrics/")
+def get_least_correlated_metrics_endpoint(k: int = 5):
+    """
+    Get the least correlated metrics from the uploaded models.
+    """
+    if not uploaded_models:
+        return {"error": "No models uploaded. Please upload models first."}
+
+    if uploaded_dataset["X"] is None or uploaded_dataset["y"] is None:
+        return {"error": "No dataset uploaded. Please upload a dataset first."}
+
+    # Convert input data to numpy arrays
+    X = np.array(uploaded_dataset["X"])
+    y = np.array(uploaded_dataset["y"])
+
+    # Calculate diversity metrics correlation
+    correlation_matrix = calculate_pairwise_metrics_for_models(uploaded_models, X, y)
+
+    # Get the least correlated metrics
+    least_correlated_metrics = ut.get_least_correlated_metrics(correlation_matrix, k)
+
+    return {"least_correlated_metrics": least_correlated_metrics.to_dict(orient='records')}
 
 @app.get("/models/")
 def list_uploaded_models():
