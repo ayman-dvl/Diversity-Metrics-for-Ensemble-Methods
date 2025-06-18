@@ -8,7 +8,7 @@ from tensorflow.python.keras.models import load_model
 import metrics as me
 import numpy as np
 import pandas as pd
-
+from tensorflow.keras.models import Sequential
 
 def get_oracle_output(model, X, y):
     """
@@ -22,7 +22,7 @@ def get_oracle_output(model, X, y):
     Returns:
     - numpy.ndarray: Array of oracle outputs (1=correct, 0=incorrect).
     """
-    if hasattr(model, 'predict_proba'):
+    if isinstance(model, Sequential):
         y_pred = (model.predict(X) > 0.5).astype(int).flatten()
     else:
         y_pred = model.predict(X)
