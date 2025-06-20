@@ -9,6 +9,7 @@ import metrics as me
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model as load
 
 def get_oracle_output(model, X, y):
     """
@@ -48,9 +49,21 @@ def load_models(models_folder):
         elif file_extension == "h5":
             models[model_name] = load_model(os.path.join(models_folder, file))
             print(f"Imported keras model: {model_name}")
+        elif file_extension == "keras":
+            models[model_name] = load(os.path.join(models_folder, file))
+            print(f"Imported keras model: {model_name}")
     return models
 
 def calculate_diversity_metrics_correlation(models, X, y):
+    """
+    Calculate diversity metrics correlation for a set of models.
+    Parameters:
+        models (dict): A dictionary of models where keys are model names and values are the models.
+        X (numpy.ndarray): Scaled test data.
+        y (numpy.ndarray): Test labels.
+    Returns:
+        pd.DataFrame: A DataFrame containing the correlation matrix of diversity metrics.
+    """
 
     oracle_outputs = {}
     for name, model in models.items():
