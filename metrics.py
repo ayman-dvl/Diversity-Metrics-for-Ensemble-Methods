@@ -39,10 +39,7 @@ def correlation(a, b):
         (N01 + N00) * 
         (N11 + N01) * 
         (N10 + N00)
-    )
-    
-    if denominator == 0:
-        return 0.0  # To avoid division by zero
+    )+ 1e-10
     
     return numerator / denominator
 # Disagreement
@@ -98,8 +95,11 @@ def entropy(matrix):
     matrix: 2D array where each row is a binary prediction from a classifier
     Returns: entropy value
     """
-    mean_correct = np.mean(matrix, axis=0)
-    return -np.mean(mean_correct * np.log2(mean_correct + 1e-10) + (1 - mean_correct) * np.log2(1 - mean_correct + 1e-10))
+    correct = np.sum(matrix, axis=0)
+    L = matrix.shape[0]
+    term= min(correct, L - correct)
+    term = term / (L-(int(L/2)))
+    return np.mean(term)
 
 # Kohavi-Wolpert variance
 def kw_variance(matrix):
@@ -112,7 +112,7 @@ def kw_variance(matrix):
     return np.mean(mean_correct * (1 - mean_correct))
 
 # Interrater agreement (kappa)
-def kappa(matrix):
+def kappa(matrix):  
     """
     Calculate Cohen's kappa statistic for a matrix of classifiers.
     matrix: 2D array where each row is a binary prediction from a classifier
